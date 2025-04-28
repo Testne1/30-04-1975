@@ -10,7 +10,6 @@
       padding: 0;
       box-sizing: border-box;
     }
-
     html, body {
       width: 100%;
       height: 100%;
@@ -19,7 +18,6 @@
       cursor: pointer;
       font-family: Arial, sans-serif;
     }
-
     /* Nền ảnh ban đầu */
     .flag-background {
       position: fixed;
@@ -32,7 +30,6 @@
       z-index: 2;
       transition: opacity 2s ease;
     }
-
     /* Nền video */
     .video-background {
       position: fixed;
@@ -45,7 +42,6 @@
       z-index: 1;
       display: none;
     }
-
     video {
       width: 100%;
       height: 100%;
@@ -54,7 +50,6 @@
       opacity: 0;
       transition: opacity 2s ease;
     }
-
     /* Text hướng dẫn */
     .tap-to-start {
       position: fixed;
@@ -67,20 +62,25 @@
       z-index: 3;
       animation: blink 1s infinite;
       user-select: none;
+      text-align: center;
+      width: 90%;
     }
-
     @keyframes blink {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
+    
+    /* Điều chỉnh font size trên thiết bị nhỏ */
+    @media (max-width: 480px) {
+      .tap-to-start {
+        font-size: 1.5rem;
+      }
+    }
   </style>
 </head>
-
 <body>
-
   <!-- Ảnh nền -->
   <div class="flag-background" id="flag-background"></div>
-
   <!-- Video nền -->
   <div class="video-background" id="video-background">
     <video id="bg-video" muted loop playsinline preload="auto">
@@ -88,47 +88,130 @@
       Trình duyệt không hỗ trợ video.
     </video>
   </div>
-
   <!-- Text nhấn để bắt đầu -->
   <div class="tap-to-start" id="tap-to-start">Nhấn để bắt đầu</div>
-
   <!-- Nhạc nền -->
   <audio id="bg-music" src="./nhac.mp3" preload="auto" loop></audio>
-
   <script>
     const flagBackground = document.getElementById('flag-background');
     const videoBackground = document.getElementById('video-background');
     const bgVideo = document.getElementById('bg-video');
     const bgMusic = document.getElementById('bg-music');
     const tapText = document.getElementById('tap-to-start');
-
+    
+    // Kiểm tra trình duyệt trên di động
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
     function startExperience() {
       tapText.style.display = 'none'; // Ẩn hướng dẫn
       flagBackground.style.opacity = '0'; // Fade out cờ
-
       // Hiện video
       videoBackground.style.display = 'block';
+      
+      // Xử lý khóa định hướng màn hình nếu có thể (chỉ hoạt động trên một số trình duyệt)
+      try {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(e => {
+            console.log('Không thể khóa định hướng màn hình:', e);
+          });
+        }
+      } catch (e) {
+        console.log('Trình duyệt không hỗ trợ khóa định hướng');
+      }
+      
       setTimeout(() => {
         bgVideo.style.opacity = '1';
-        bgVideo.play().catch(err => {
-          console.log('Video lỗi: ', err);
-        });
+        
+        // Xử lý phát video
+        const playVideo = function() {
+          bgVideo.play().catch(err => {
+            console.log('Video lỗi: ', err);
+            // Thử lại phát video khi có tương tác người dùng
+            document.body.addEventListener('click', function videoRetry() {
+              bgVideo.play().catch(e => console.log('Vẫn lỗi video:', e));
+              document.body.removeEventListener('click', videoRetry);
+            }, { once: true });
+          });
+        };
+        playVideo();
+        
+        // Xử lý phát nhạc
+        const playMusic = function() {
+          bgMusic.play().catch(err => {
+            console.log('Nhạc lỗi: ', err);
+            // Thử lại phát nhạc khi có tương tác người dùng
+            document.body.addEventListener('click', function musicRetry() {
+              bgMusic.play().catch(e => console.log('Vẫn lỗi nhạc:', e));
+              document.body.removeEventListener('click', musicRetry);
+            }, { once: true });
+          });
+        };
+        playMusic();
+        
       }, 100); // Delay nhỏ để CSS kịp nhận display:block
-
-      // Phát nhạc
-      bgMusic.play().catch(err => {
-        console.log('Nhạc lỗi: ', err);
-      });
-
+      
       // Xóa sự kiện click sau lần đầu
       document.body.removeEventListener('click', startExperience);
       document.body.removeEventListener('touchstart', startExperience);
     }
-
-    // Cho PC và điện thoại
-    document.body.addEventListener('click', startExperience);
-    document.body.addEventListener('touchstart', startExperience);
+    
+    // Hàm xử lý fullscreen trên các thiết bị khác nhau
+    function toggleFullScreen() {
+      if (!document.fullscreenElement && !document.mozFullScreenElement &&
+        !document.webkitFullscreenElement && !document.msFullscreenElement) {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) {
+          document.documentElement.msRequestFullscreen();
+        } else if (document.documentElement.mozRequestFullScreen) {
+          document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullscreen) {
+          document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+        }
+      }
+    }
+    
+    // Hàm chính xử lý tương tác người dùng
+    function handleInteraction() {
+      // Cố gắng bật fullscreen cho trải nghiệm tốt nhất
+      if (isMobile) {
+        try {
+          toggleFullScreen();
+        } catch (e) {
+          console.log('Không thể chuyển fullscreen:', e);
+        }
+      }
+      
+      // Bắt đầu trải nghiệm
+      startExperience();
+    }
+    
+    // Sự kiện cho PC và điện thoại
+    document.body.addEventListener('click', handleInteraction);
+    document.body.addEventListener('touchstart', handleInteraction);
+    
+    // Đảm bảo video và âm thanh vẫn phát khi chuyển tab
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') {
+        if (bgVideo.paused && bgVideo.style.opacity === '1') {
+          bgVideo.play().catch(e => console.log('Không thể tiếp tục phát video:', e));
+        }
+        if (bgMusic.paused && bgVideo.style.opacity === '1') {
+          bgMusic.play().catch(e => console.log('Không thể tiếp tục phát nhạc:', e));
+        }
+      }
+    });
+    
+    // Đảm bảo phát sẵn các media từ sự kiện người dùng
+    function preloadMedia() {
+      bgVideo.load();
+      bgMusic.load();
+      document.body.removeEventListener('touchstart', preloadMedia);
+      document.body.removeEventListener('click', preloadMedia);
+    }
+    
+    document.body.addEventListener('touchstart', preloadMedia, { once: true });
+    document.body.addEventListener('click', preloadMedia, { once: true });
   </script>
-
 </body>
 </html>
