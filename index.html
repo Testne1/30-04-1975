@@ -1,141 +1,134 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>30-04 Responsive</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: black;
-            cursor: pointer;
-            font-family: Arial, sans-serif;
-        }
-        /* Nền ảnh cờ */
-        
-        .flag-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: url('./co_vn.jpg') no-repeat center center;
-            background-size: cover;
-            z-index: 1;
-            transition: opacity 2s ease;
-        }
-        /* Video */
-        
-        .video-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            z-index: 0;
-            display: none;
-            /* Ẩn ban đầu */
-        }
-        
-        #bg-video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            /* Giúp video fit đúng màn hình */
-            opacity: 0;
-            transition: opacity 2s ease;
-        }
-        /* Text hướng dẫn */
-        
-        .tap-to-start {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 2rem;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
-            z-index: 2;
-            animation: blink 1s infinite;
-        }
-        
-        @keyframes blink {
-            0%,
-            100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>30-04 - Responsive</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: black;
+      cursor: pointer;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Nền ảnh ban đầu */
+    .flag-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: url('./co_vn.png') no-repeat center center;
+      background-size: cover;
+      z-index: 2;
+      transition: opacity 2s ease;
+    }
+
+    /* Nền video */
+    .video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: black;
+      z-index: 1;
+      display: none;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0;
+      transition: opacity 2s ease;
+    }
+
+    /* Text hướng dẫn */
+    .tap-to-start {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 2rem;
+      text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+      z-index: 3;
+      animation: blink 1s infinite;
+      user-select: none;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
 </head>
 
 <body>
 
-    <!-- Ảnh cờ đỏ sao vàng -->
-    <div class="flag-background" id="flag-background"></div>
+  <!-- Ảnh nền -->
+  <div class="flag-background" id="flag-background"></div>
 
-    <!-- Video -->
-    <div class="video-background" id="video-background">
-        <video id="bg-video" muted loop playsinline>
+  <!-- Video nền -->
+  <div class="video-background" id="video-background">
+    <video id="bg-video" muted loop playsinline preload="auto">
       <source src="./doclap.mp4" type="video/mp4">
-      Your browser does not support the video tag.
+      Trình duyệt không hỗ trợ video.
     </video>
-    </div>
+  </div>
 
-    <!-- Text nhắc người dùng click -->
-    <div class="tap-to-start" id="tap-to-start">Nhấn để bắt đầu</div>
+  <!-- Text nhấn để bắt đầu -->
+  <div class="tap-to-start" id="tap-to-start">Nhấn để bắt đầu</div>
 
-    <!-- Nhạc nền -->
-    <audio id="bg-music" src="./nhac.mp3" loop></audio>
+  <!-- Nhạc nền -->
+  <audio id="bg-music" src="./nhac.mp3" preload="auto" loop></audio>
 
-    <script>
-        const flagBackground = document.getElementById('flag-background');
-        const videoBackground = document.getElementById('video-background');
-        const bgVideo = document.getElementById('bg-video');
-        const bgMusic = document.getElementById('bg-music');
-        const tapText = document.getElementById('tap-to-start');
+  <script>
+    const flagBackground = document.getElementById('flag-background');
+    const videoBackground = document.getElementById('video-background');
+    const bgVideo = document.getElementById('bg-video');
+    const bgMusic = document.getElementById('bg-music');
+    const tapText = document.getElementById('tap-to-start');
 
-        function startExperience() {
-            // Ẩn chữ
-            tapText.style.display = 'none';
+    function startExperience() {
+      tapText.style.display = 'none'; // Ẩn hướng dẫn
+      flagBackground.style.opacity = '0'; // Fade out cờ
 
-            // Ẩn ảnh cờ
-            flagBackground.style.opacity = '0';
+      // Hiện video
+      videoBackground.style.display = 'block';
+      setTimeout(() => {
+        bgVideo.style.opacity = '1';
+        bgVideo.play().catch(err => {
+          console.log('Video lỗi: ', err);
+        });
+      }, 100); // Delay nhỏ để CSS kịp nhận display:block
 
-            // Hiện video
-            videoBackground.style.display = 'block';
-            setTimeout(() => {
-                bgVideo.style.opacity = '1';
-                bgVideo.play();
-            }, 100);
+      // Phát nhạc
+      bgMusic.play().catch(err => {
+        console.log('Nhạc lỗi: ', err);
+      });
 
-            // Phát nhạc
-            bgMusic.play().catch((e) => {
-                console.log('Nhạc cần click nếu bị chặn');
-            });
+      // Xóa sự kiện click sau lần đầu
+      document.body.removeEventListener('click', startExperience);
+      document.body.removeEventListener('touchstart', startExperience);
+    }
 
-            // Gỡ bỏ sự kiện sau khi click 1 lần
-            document.body.removeEventListener('click', startExperience);
-            document.body.removeEventListener('touchstart', startExperience);
-        }
-
-        document.body.addEventListener('click', startExperience);
-        document.body.addEventListener('touchstart', startExperience); // Cho mobile
-    </script>
+    // Cho PC và điện thoại
+    document.body.addEventListener('click', startExperience);
+    document.body.addEventListener('touchstart', startExperience);
+  </script>
 
 </body>
-
 </html>
